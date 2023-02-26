@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+  <head>
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="d3sparql.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="mvp.css">
+  <script src="script.js"></script>
+  </head>
+  <body onload="renderall()">
+    <header>
+    <h1>OpenEdition Explorer</h1>
+    </header>
+    <hr>
+  <header>
+      <div id="result"></div>
+      <input type="range", id="authors" name="authors", min="0", max="41", default="10", oninput="renderbarchartauth(event.target.value)">
+      <label for="authors">Number of authors</label>
+  </header>
+  </body>
+</html>

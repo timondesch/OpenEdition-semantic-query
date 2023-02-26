@@ -14,19 +14,29 @@
     </header>
     <hr>
   <header>
+      <h2>Books and their number of authors</h2>
       <div id="result"></div>
-      <input type="range", id="authors" name="authors", min="0", max="41", default="10", oninput="renderbarchartauth(event.target.value)">
-      <label for="authors">Books and their number of authors</label>
+      <section>
+        <input type="range", id="authors" name="authors", min="0", max="41", default="10", oninput="renderbarchartauth(event.target.value);this.nextElementSibling.innerHTML = this.value">
+        <p>10</p>
+      </section>
+
+      <aside>
+        <h3 id="selection_popup">Please select a book</h3>
+        <p id="title"><b>Title: </b></p>
+        <p id="nbauthors"><b>Number of authors : </b></p>
+
+      </aside>
   </header>
   <hr>
   <header>
+      <h2>Distribution of authors' birth month for authors appearing in both OpenEdition and Wikidata</h2>
     <div id="birthday"></div>
-    <label for="birthday">Distribution of authors' birth month for authors appearing in both OpenEdition and Wikidata</label>
   </header>
   <hr>
   <header>
     <div id="type"></div>
-    <label for="type">Book genre in OpenEdition by popularity</label>
+    <label for="type">Book genres in OpenEdition by popularity</label>
   </header>
   </body>
 </html>

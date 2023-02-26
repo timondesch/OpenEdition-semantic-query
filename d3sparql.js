@@ -418,6 +418,103 @@ d3sparql.htmlhash = function(json, config) {
     }
     </style>
 */
+
+
+
+d3sparql.custom_barchart_authors = function(json, config) {
+  config = config || {}
+
+  var head = json.head.vars
+  var data = json.results.bindings
+
+  var opts = {
+    "label_x":  config.label_x  || head[0],
+    "label_y":  config.label_y  || head[1],
+    "var_x":    config.var_x    || head[0],
+    "var_y":    config.var_y    || head[1],
+    "width":    config.width    || 750,
+    "height":   config.height   || 300,
+    "margin":   config.margin   || 80,  // TODO: to make use of {top: 10, right: 10, bottom: 80, left: 80}
+    "selector": config.selector || null
+  }
+
+  var scale_x = d3.scale.ordinal().rangeRoundBands([0, opts.width - opts.margin], 0.1)
+  var scale_y = d3.scale.linear().range([opts.height - opts.margin, 0])
+  var axis_x = d3.svg.axis().scale(scale_x).orient("bottom")
+  var axis_y = d3.svg.axis().scale(scale_y).orient("left")  // .ticks(10, "%")
+  scale_x.domain(data.map(function(d) { return d[opts.var_x].value }))
+  scale_y.domain([0, d3.max(data, function(d) { return parseInt(d[opts.var_y].value) })])
+
+  var svg = d3sparql.select(opts.selector, "barchart").append("svg")
+    .attr("width", opts.width)
+    .attr("height", opts.height)
+   .append("g")
+   .attr("transform", "translate(" + opts.margin + "," + 0 + ")")
+
+  var ax = svg.append("g")
+    .attr("class", "axis x")
+    .attr("transform", "translate(" + opts.margin + "," + (opts.height - opts.margin) + ")")
+    .call(axis_x)
+  var ay = svg.append("g")
+    .attr("class", "axis y")
+    .attr("transform", "translate(" + opts.margin + ",0)")
+    .call(axis_y)
+  var bar = svg.selectAll(".bar")
+    .data(data)
+    .enter()
+    .append("rect")
+    .attr("value", function(d) {return d.pCount.value})
+    .attr("title", function(d) {return d.t.value})
+    .attr("transform", "translate(" + opts.margin + "," + 0 + ")")
+    .attr("class", "bar")
+    .attr("x", function(d) { return scale_x(d[opts.var_x].value) })
+    .attr("width", scale_x.rangeBand())
+    .attr("y", function(d) { return scale_y(d[opts.var_y].value) })
+    .attr("height", function(d) { return opts.height - scale_y(parseInt(d[opts.var_y].value)) - opts.margin })
+/*
+    .call(function(e) {
+      e.each(function(d) {
+        console.log(parseInt(d[opts.var_y].value))
+      })
+    })
+*/
+  ax.selectAll("text")
+    .attr("dy", ".35em")
+    .attr("x", 10)
+    .attr("y", 0)
+    .attr("transform", "rotate(90)")
+    .style("text-anchor", "start")
+  ax.append("text")
+    .attr("class", "label")
+    .text(opts.label_x)
+    .style("text-anchor", "middle")
+    .attr("transform", "translate(" + ((opts.width - opts.margin) / 2) + "," + (opts.margin - 5) + ")")
+  ay.append("text")
+    .attr("class", "label")
+    .text(opts.label_y)
+    .style("text-anchor", "middle")
+    .attr("transform", "rotate(-90)")
+    .attr("x", 0 - (opts.height / 2))
+    .attr("y", 0 - (opts.margin - 20))
+
+  // default CSS/SVG
+  bar.attr({
+    "fill": "orange",
+  })
+  svg.selectAll(".axis").attr({
+    "stroke": "black",
+    "fill": "none",
+    "shape-rendering": "crispEdges",
+  })
+  svg.selectAll("text").attr({
+    "stroke": "none",
+    "fill": "black",
+    "font-size": "8pt",
+    "font-family": "sans-serif",
+  })
+}
+
+
 d3sparql.barchart = function(json, config) {
   config = config || {}
 
@@ -440,13 +537,13 @@ d3sparql.barchart = function(json, config) {
   var axis_x = d3.svg.axis().scale(scale_x).orient("bottom")
   var axis_y = d3.svg.axis().scale(scale_y).orient("left")  // .ticks(10, "%")
   scale_x.domain(data.map(function(d) { return d[opts.var_x].value }))
-  scale_y.domain(d3.extent(data, function(d) { return parseInt(d[opts.var_y].value) }))
+  scale_y.domain([0, d3.max(data, function(d) { return parseInt(d[opts.var_y].value) })])
 
   var svg = d3sparql.select(opts.selector, "barchart").append("svg")
     .attr("width", opts.width)
     .attr("height", opts.height)
-  //  .append("g")
-  //  .attr("transform", "translate(" + opts.margin + "," + 0 + ")")
+   .append("g")
+   .attr("transform", "translate(" + opts.margin + "," + 0 + ")")
 
   var ax = svg.append("g")
     .attr("class", "axis x")
@@ -2049,3 +2146,143 @@ d3sparql.frameheight = function(height) {
 
 /* for Node.js */
 //module.exports = d3sparql
+
+
+
+d3sparql.barchart2 = function(json, config) {
+  config = config || {}
+
+  var head = json.head.vars
+  var data = json.results.bindings
+
+  data[11] = {"birth": {type: 'literal', datatype: 'http://www.w3.org/2001/XMLSchema#integer', value: '12'}
+            , "bcount":{type: 'literal', datatype: 'http://www.w3.org/2001/XMLSchema#integer', value: '0'}}
+  
+  for (var i=0;i<data.length;i++)
+  { 
+    switch(data[i].birth.value){
+      case '1':
+        data[i].birth.value = "January";
+        break; 
+      case '2':
+        data[i].birth.value = "February";
+        break; 
+      case '3':
+        data[i].birth.value = "March";
+        break;
+      case '4':
+        data[i].birth.value = "April";
+        break; 
+      case '5':
+        data[i].birth.value = "May";
+        break; 
+      case '6':
+        data[i].birth.value = "June";
+        break; 
+      case '7':
+        data[i].birth.value = "July";
+        break; 
+      case '8':
+        data[i].birth.value = "August";
+        break; 
+      case '9':
+        data[i].birth.value = "September";
+        break; 
+      case '10':
+        data[i].birth.value = "October";
+        break; 
+      case '11':
+        data[i].birth.value = "November";
+        break; 
+      case '12':
+        data[i].birth.value = "December";
+        break; 
+    }
+  }
+  console.log(data)
+
+
+  var opts = {
+    "label_x":  config.label_x  || head[0],
+    "label_y":  config.label_y  || head[1],
+    "var_x":    config.var_x    || head[0],
+    "var_y":    config.var_y    || head[1],
+    "width":    config.width    || 750,
+    "height":   config.height   || 300,
+    "margin":   config.margin   || 80,  // TODO: to make use of {top: 10, right: 10, bottom: 80, left: 80}
+    "selector": config.selector || null
+  }
+  var a = [1,2,3,4,5,6,7,8,9,10,11,12]
+  var scale_x = d3.scale.ordinal().rangeRoundBands([0, opts.width - opts.margin], 0.2)
+  
+  var scale_y = d3.scale.linear().range([opts.height - opts.margin, 10])
+  var axis_x = d3.svg.axis().scale(scale_x).orient("bottom")
+  var axis_y = d3.svg.axis().scale(scale_y).orient("left")  // .ticks(10, "%")
+  scale_x.domain(data.map(function(d) { return d[opts.var_x].value }))
+  scale_y.domain(d3.extent(data, function(d) { return parseInt(d[opts.var_y].value) }))
+
+  var svg = d3sparql.select(opts.selector, "barchart").append("svg")
+    .attr("width", opts.width)
+    .attr("height", opts.height)
+  
+
+  var ax = svg.append("g")
+    .attr("class", "axis x")
+    .attr("transform", "translate(" + opts.margin + "," + (opts.height - opts.margin) + ")")
+    .call(axis_x)
+  var ay = svg.append("g")
+    .attr("class", "axis y")
+    .attr("transform", "translate(" + opts.margin + ",0)")
+    .call(axis_y)
+  var bar = svg.selectAll(".bar")
+    .data(data)
+    .enter()
+    .append("rect")
+    .attr("transform", "translate(" + opts.margin + "," + 0 + ")")
+    .attr("class", "bar")
+    .attr("x", function(d) { return scale_x(d[opts.var_x].value) })
+    .attr("width", scale_x.rangeBand())
+    .attr("y", function(d) { return scale_y(d[opts.var_y].value) })
+    .attr("height", function(d) { return opts.height - scale_y(parseInt(d[opts.var_y].value)) - opts.margin })
+/*
+    .call(function(e) {
+      e.each(function(d) {
+        console.log(parseInt(d[opts.var_y].value))
+      })
+    })
+*/
+  ax.selectAll("text")
+    .attr("dy", ".35em")
+    .attr("x", 10)
+    .attr("y", 0)
+    .attr("transform", "rotate(90)")
+    .style("text-anchor", "start")
+  ax.append("text")
+    .attr("class", "label")
+    .text(opts.label_x)
+    .style("text-anchor", "middle")
+    .attr("transform", "translate(" + ((opts.width - opts.margin) / 2) + "," + (opts.margin - 5) + ")")
+  ay.append("text")
+    .attr("class", "label")
+    .text(opts.label_y)
+    .style("text-anchor", "middle")
+    .attr("transform", "rotate(-90)")
+    .attr("x", 0 - (opts.height / 2))
+    .attr("y", 0 - (opts.margin - 20))
+
+  // default CSS/SVG
+  bar.attr({
+    "fill": "orange",
+  })
+  svg.selectAll(".axis").attr({
+    "stroke": "black",
+    "fill": "none",
+    "shape-rendering": "crispEdges",
+  })
+  svg.selectAll("text").attr({
+    "stroke": "none",
+    "fill": "black",
+    "font-size": "8pt",
+    "font-family": "sans-serif",
+  })
+}

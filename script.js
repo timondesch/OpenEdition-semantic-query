@@ -76,10 +76,12 @@ function renderbarchartauth(nb_authors) {
           "var_y":    "pCount",       // SPARQL variable name for y-axis (optional; default is the 2nd variable)
           "width":    850,            // canvas width (optional)
           "height":   300,            // canvas height (optional)
-          "margin":   40,             // canvas margin (optional)
+          "margin":   80,             // canvas margin (optional)
           "selector": "#result"
         }
-        d3sparql.barchart(render, config)
+        d3sparql.custom_barchart_authors(render, config);
+        console.log(render);
+        setup_chart();
     })
 }
 
@@ -140,7 +142,7 @@ function renderbarchartbirth(nb_authors){
       "margin":   100,             // canvas margin (optional)
       "selector": "#birthday"
     }
-    d3sparql.barchart(render, config)
+    d3sparql.barchart2(render, config)
   })
 }
 
@@ -190,3 +192,25 @@ d3sparql.query(endpoint, sparql, (render) => {
 })
 
 }
+
+function setup_chart(){
+  // const test = d3.select *("#result *");
+  // const style = test.on("click", function(event, d) {
+  //   console.log(event, d);
+  // });
+
+  var clickChart = d3.selectAll("#result .bar").on("click", function(e) {
+    document.querySelector("#selection_popup").innerHTML = "";
+    document.querySelector("#title").innerHTML = "<b>Title: </b>" + e.t.value;
+    document.querySelector("#nbauthors").innerHTML = "<b>Number of authors: </b>" + e.pCount.value;
+  });
+  
+  // var clickChart = document.querySelectorAll("#result *").forEach(a => a.addEventListener("click", e => {
+  //   console.log(e);
+  // }))
+}
+
+
+// var clickChart = document.querySelectorAll("#result div svg .bar").forEach(a => a.addEventListener("click", e => {
+//   console.log("test");
+// }))

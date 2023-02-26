@@ -642,6 +642,7 @@ d3sparql.barchart = function(json, config) {
     }
     </style>
 */
+
 d3sparql.piechart = function(json, config) {
   config = config || {}
 
@@ -671,25 +672,62 @@ d3sparql.piechart = function(json, config) {
     .value(function(d) { return d[opts.size].value })
 
   var svg = d3sparql.select(opts.selector, "piechart").append("svg")
-    .attr("width", opts.width)
+    .attr("width", opts.width*1.5)
     .attr("height", opts.height)
-    .append("g")
-    .attr("transform", "translate(" + opts.width / 2 + "," + opts.height / 2 + ")")
 
-  var g = svg.selectAll(".arc")
+
+  var g = svg.append("g")
+    .attr("transform", "translate(" + opts.width / 2 + "," + opts.height / 2 + ")")
+    .attr("class", "arc")
+    .selectAll(".arc")
     .data(pie(data))
     .enter()
     .append("g")
-    .attr("class", "arc")
+    
   var slice = g.append("path")
     .attr("d", arc)
     .attr("fill", function(d, i) { return color(i) })
-  var text = g.append("text")
-    .attr("class", "label")
-    .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")" })
-    .attr("dy", ".35em")
-    .attr("text-anchor", "middle")
-    .text(function(d) { return d.data[opts.label].value })
+  // var text = g.append("text")
+  //   .attr("class", "label")
+  //   .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")" })
+  //   .attr("dy", ".35em")
+  //   .attr("text-anchor", "middle")
+  //   .text(function(d) { return d.data[opts.label].value })
+    
+  var temp = 50;//高度增量
+  var legend = svg.append("g")
+    // .attr("transform", "translate(" + (opts.width-10) + ",10 )")
+    .attr("class", "legendRect")
+    .selectAll(".legendRect")
+    .data(color)
+    .enter()
+    .append("rect")
+    .attr("x", function(d) { return opts.width; })
+    .attr("y", function(d) { temp = temp + 20;return temp; })
+    .attr("width", 15)
+    .attr("height", 15)
+    .style("fill", function(d,i) { return color(i); });
+      
+
+  
+
+    // 添加legend名称
+    temp = 60;
+    svg.append("g")
+        .selectAll(".legendText")
+        .data(pie(data))
+        .enter()
+        .append("text")
+        .attr("class", "legendText")
+        .attr("x", function(d) { return opts.width +20; })
+        .attr("y", function(d) { temp = temp + 20;return temp; })
+        .attr("dx", ".35em")
+        .attr("dy", 0)
+        // .attr("text-anchor", "middle")//默认左对齐，middle中对齐，end右对齐
+        .text(function(d) { return d.data[opts.label].value })
+      
+
+
 
   // default CSS/SVG
   slice.attr({
@@ -703,6 +741,7 @@ d3sparql.piechart = function(json, config) {
     "font-family": "sans-serif",
   })
 }
+
 
 /*
   Rendering sparql-results+json object into a scatter plot
